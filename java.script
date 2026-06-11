@@ -1,0 +1,58 @@
+const express = require('express');
+const app = express();
+const PORT = process.env.PORT || 3000;
+
+// Middleware para permitir o envio de dados em formato JSON
+app.use(express.json());
+
+// Banco de dados temporário na memória
+let tarefas = [
+    { id: 1, titulo: "Estudar para a prova de Back-End", concluida: false },
+    { id: 2, titulo: "Entregar o projeto no GitHub", concluida: true }
+];
+
+// Rota inicial / Rota de teste
+app.get('/', (req, res) => {
+    res.json({ mensagem: "API To-Do ativa e funcionando com sucesso!" });
+});
+
+// GET: Listar todas as tarefas
+app.get('/tarefas', (req, res) => {
+    res.json(tarefas);
+});
+
+// POST: Criar uma nova tarefa
+app.post('/tarefas', (req, res) => {
+    const { titulo } = req.body;
+    
+    if (!titulo) {
+        return res.status(400).json({ erro: "O título da tarefa é obrigatório." });
+    }
+
+    const novaTarefa = {
+        id: tarefas.length + 1,
+        titulo,
+        concluida: false
+    };
+
+    tarefas.push(novaTarefa);
+    res.status(201).json(novaTarefa);
+});
+
+// DELETE: Remover uma tarefa pelo ID
+app.delete('/tarefas/:id', (req, res) => {
+    const id = parseInt(req.params.id);
+    const index = tarefas.findIndex(t => t.id === id);
+
+    if (index === -1) {
+        return res.status(404).json({ erro: "Tarefa não encontrada." });
+    }
+
+    tarefas.splice(index, 1);
+    res.json({ mensagem: `Tarefa com ID ${id} foi removida.` });
+});
+
+// Iniciando o servidor
+app.listen(PORT, () => {
+    console.log(`Servidor rodando na porta ${PORT}`);
+});
